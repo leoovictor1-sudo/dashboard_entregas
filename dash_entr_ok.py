@@ -5,7 +5,6 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-
 # --------------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
 # --------------------------------------------------------
@@ -16,22 +15,20 @@ st.set_page_config(page_title="Dashboard de Entregas", layout="wide")
 # FUNÇÃO PARA CARREGAR E LIMPAR A PLANILHA
 # --------------------------------------------------------
 def carregar_bd():
-        caminho = 'dadss.xlsx'
-        df = pd.read_excel(caminho, engine="openpyxl", index_col=None)
+    caminho = 'dadss.xlsx'
+    df = pd.read_excel(caminho, engine="openpyxl", index_col=None)
 
-        # Remove colunas Unnamed
-        df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
+    # Remove colunas Unnamed
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
 
-        # Remove colunas vazias
-        df = df.loc[:, df.columns != ""]
+    # Remove colunas vazias
+    df = df.loc[:, df.columns != ""]
 
-        # Converte DATA automaticamente
-        if "DATA" in df.columns:
-            df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
+    # Converte DATA automaticamente
+    if "DATA" in df.columns:
+        df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
 
-        return df
-
-  
+    return df
 
 
 # --------------------------------------------------------
@@ -119,6 +116,14 @@ elif pagina == "🔍 Filtros":
         if empresa_sel != "Todas":
             df_f = df_f[df_f["EMPRESA"] == empresa_sel]
 
+    # ⭐ Filtro por PLACA
+    if "PLACAS" in df.columns:
+        placas = sorted(df["PLACAS"].dropna().unique())
+        placa_sel = st.selectbox("Placa:", ["Todas"] + placas)
+
+        if placa_sel != "Todas":
+            df_f = df_f[df_f["PLACAS"] == placa_sel]
+
     # Filtro data
     col1, col2 = st.columns(2)
 
@@ -179,7 +184,15 @@ elif pagina == "📘 Resumo":
         if empresa_sel != "Todas":
             df_r = df_r[df_r["EMPRESA"] == empresa_sel]
 
-    # 2 — Filtro por Cliente
+    # ⭐ 2 — Filtro POR PLACA (NOVO)
+    if "PLACAS" in df.columns:
+        placas = sorted(df["PLACAS"].dropna().unique())
+        placa_sel = st.selectbox("Placa:", ["Todas"] + placas)
+
+        if placa_sel != "Todas":
+            df_r = df_r[df_r["PLACAS"] == placa_sel]
+
+    # 3 — Filtro por Cliente
     if "CLIENTE" in df.columns:
         clientes = sorted(df["CLIENTE"].dropna().unique())
         cliente_sel = st.selectbox("Cliente:", ["Todos"] + clientes)
@@ -187,7 +200,7 @@ elif pagina == "📘 Resumo":
         if cliente_sel != "Todos":
             df_r = df_r[df_r["CLIENTE"] == cliente_sel]
 
-    # 3 — Filtro por Data
+    # 4 — Filtro por Data
     col1, col2 = st.columns(2)
 
     with col1:
@@ -201,7 +214,6 @@ elif pagina == "📘 Resumo":
         (df_r["DATA"] <= pd.to_datetime(data_fim))
     ]
 
-
     # --------------------------------------------------------
     # CÁLCULOS IMPORTANTES DO RESUMO
     # --------------------------------------------------------
@@ -209,11 +221,9 @@ elif pagina == "📘 Resumo":
     total_m3 = df_r["QUANT."].sum() if "QUANT." in df_r.columns else 0
     total_faturamento = df_r["V.NF"].sum() if "V.NF" in df_r.columns else 0
 
-
     # --------------------------------------------------------
     # CARDS RESUMIDOS
     # --------------------------------------------------------
-   
     st.subheader("📊 Indicadores Gerais")
 
     colA, colB, colC = st.columns(3)
@@ -231,17 +241,16 @@ elif pagina == "📘 Resumo":
 
     st.subheader("🧾 Resumo Final")
     resumo_texto = f"""
-    ✔ Viagens filtradas: {total_viagens}
+✔ Viagens filtradas: {total_viagens}
 
-    ✔ Total de m³ filtrados: {total_m3:,.2f}
+✔ Total de m³ filtrados: {total_m3:,.2f}
 
-    ✔ Faturamento filtrado: R$ {total_faturamento:,.2f}
+✔ Faturamento filtrado: R$ {total_faturamento:,.2f}
 
-    ✔ Total de viagens (novamente): {total_viagens}
-    """
+✔ Total de viagens (novamente): {total_viagens}
+"""
 
     st.write(resumo_texto)
-
 
     # --------------------------------------------------------
     # 🔽 BOTÃO PARA BAIXAR RESUMO EM PDF
@@ -264,4 +273,3 @@ elif pagina == "📘 Resumo":
         file_name="resumo_entregas.pdf",
         mime="application/pdf"
     )
-
