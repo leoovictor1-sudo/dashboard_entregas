@@ -15,9 +15,8 @@ st.set_page_config(page_title="Dashboard de Entregas", layout="wide")
 # --------------------------------------------------------
 # FUNÇÃO PARA CARREGAR E LIMPAR A PLANILHA
 # --------------------------------------------------------
-def carregar_bd(caminho):
-    if os.path.exists(caminho):
-
+def carregar_bd():
+        caminho = 'dadss.xlsx'
         df = pd.read_excel(caminho, engine="openpyxl", index_col=None)
 
         # Remove colunas Unnamed
@@ -32,9 +31,7 @@ def carregar_bd(caminho):
 
         return df
 
-    else:
-        st.error("⚠️ Arquivo não encontrado!")
-        st.stop()
+  
 
 
 # --------------------------------------------------------
@@ -81,7 +78,7 @@ pagina = st.sidebar.radio(
 # --------------------------------------------------------
 # CARREGAR PLANILHA
 # --------------------------------------------------------
-df = carregar_bd(r"C:\Users\User\OneDrive\Desktop\DASHBOARD\dadss.xlsx")
+df = carregar_bd()
 
 
 # ========================================================
@@ -267,3 +264,4 @@ elif pagina == "📘 Resumo":
         file_name="resumo_entregas.pdf",
         mime="application/pdf"
     )
+
